@@ -1,5 +1,13 @@
 from PIL import Image
 
+from io import BytesIO
+try:
+    from urllib.parse import urlparse
+    from urllib.request import urlopen
+except ImportError:
+    from urlparse import urlparse
+    from urllib2 import urlopen
+
 ASCII_CHARS = ['.',',',':',';','+','*','?','%','S','#','@']
 ASCII_CHARS = ASCII_CHARS[::-1]
 
@@ -56,8 +64,17 @@ method runner():
 '''
 def runner(path):
     image = None
+    uri = None
     try:
-        image = Image.open(path)
+        uri = urlparse(path)
+    except:
+        print("Unsupported URL format.",path)
+        return
+    try:
+        if uri.scheme == "":
+            image = Image.open(path)
+        else:
+            image = Image.open(BytesIO(urlopen(path).read()))
     except Exception:
         print("Unable to find image in",path)
         #print(e)
